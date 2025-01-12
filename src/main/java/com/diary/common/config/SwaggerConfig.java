@@ -18,8 +18,8 @@ public class SwaggerConfig {
     // API 정보 설정
     Info info =
         new Info()
-            .title("Spring Template API")
-            .description("Spring Template Application API Documentation")
+            .title("Diary API")
+            .description("Diary Application API Documentation")
             .version("v1.0.0")
             .license(new License().name("Apache 2.0").url("http://springdoc.org"));
 
