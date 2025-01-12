@@ -9,12 +9,6 @@ server:
       max: 200         # 최대 스레드 수
       idle-timeout: 60000  # 유휴 스레드 타임아웃 (ms)
     connection-idle-timeout: 30000  # 연결 유휴 타임아웃 (ms)
-    accesslog:
-      enabled: true    # 접근 로그 활성화
-      append: true
-      filename: ./logs/jetty-access.log
-      retain-days: 30
-      custom-format: '%{client}a - %u [%{dd/MMM/yyyy:HH:mm:ss Z}t] "%r" %s %b "%{Referer}i" "%{User-Agent}i" %{ms}T'
 
 logging:
   file:
