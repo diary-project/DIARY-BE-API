@@ -2,10 +2,27 @@ spring:
   profiles:
     active: local
 
+server:
+  jetty:
+    threads:
+      min: 10          # 최소 스레드 수
+      max: 200         # 최대 스레드 수
+      idle-timeout: 60000  # 유휴 스레드 타임아웃 (ms)
+    connection-idle-timeout: 30000  # 연결 유휴 타임아웃 (ms)
+    accesslog:
+      enabled: true    # 접근 로그 활성화
+      append: true
+      filename: ./logs/jetty-access.log
+      retain-days: 30
+      custom-format: '%{client}a - %u [%{dd/MMM/yyyy:HH:mm:ss Z}t] "%r" %s %b "%{Referer}i" "%{User-Agent}i" %{ms}T'
+
 logging:
+  file:
+    path: ./logs
   level:
     org.daejoeng.common.config.security: DEBUG
     org.springframework.security: DEBUG
+    org.eclipse.jetty: INFO    # Jetty 로그 레벨 설정
 
 springdoc:
   swagger-ui:
