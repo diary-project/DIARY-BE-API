@@ -31,62 +31,54 @@ public class DataInitializer {
   @Profile({"local", "dev"})
   public CommandLineRunner initializeData() {
     return args -> {
-      log.info("Initializing test data...");
+      try {
+        // DB가 비어있는지 확인
+        if (userRepository.count() > 0) {
+          log.info("Database is not empty. Skipping data initialization.");
+          return;
+        }
 
-      // 테스트 사용자 생성
-      User testUser = createTestUser();
-      log.info("Created test user: {}", testUser.getEmail());
+        log.info("Initializing test data...");
 
-      // 테스트 일기 생성
-      createTestDiaries(testUser);
-      log.info("Created test diaries for user: {}", testUser.getEmail());
+        // 테스트 유저 생성
+        User testUser =
+            User.builder()
+                .id("t_test123")
+                .email("test@example.com")
+                .password(passwordEncoder.encode("test1234"))
+                .name("테스트 유저")
+                .role(Role.USER)
+                .authProvider(AuthProvider.TEST)
+                .build();
 
-      log.info("Test data initialization completed.");
+        testUser = userRepository.save(testUser);
+        log.info("Test user created: {}", testUser.getEmail());
+
+        // 테스트 일기 생성
+        createTestDiary(testUser.getId(), LocalDate.now(), List.of(Weather.SUNNY), "오늘은 날씨가 좋았다.");
+        createTestDiary(
+            testUser.getId(), LocalDate.now().minusDays(1), List.of(Weather.RAINY), "비가 왔다.");
+        createTestDiary(
+            testUser.getId(), LocalDate.now().minusDays(2), List.of(Weather.CLOUDY), "흐린 날씨였다.");
+
+        log.info("Test data initialization completed successfully.");
+      } catch (Exception e) {
+        log.error("Failed to initialize test data", e);
+        // 초기화 실패 시 로그만 남기고 애플리케이션은 계속 실행
+      }
     };
   }
 
-  private User createTestUser() {
-    String testUserId = "t_" + System.currentTimeMillis();
-    User user =
-        User.builder()
-            .id(testUserId)
-            .email("test@example.com")
-            .password(passwordEncoder.encode("test1234"))
-            .role(Role.USER)
-            .authProvider(AuthProvider.TEST)
-            .build();
+  private void createTestDiary(
+      String userId, LocalDate date, List<Weather> weathers, String content) {
+    try {
+      Diary diary =
+          Diary.builder().userId(userId).date(date).weathers(weathers).content(content).build();
 
-    return userRepository.save(user);
-  }
-
-  private void createTestDiaries(User user) {
-    // 오늘 일기
-    Diary today =
-        Diary.builder()
-            .userId(user.getId())
-            .date(LocalDate.now())
-            .weathers(List.of(Weather.SUNNY))
-            .content("오늘은 날씨가 좋아서 공원에 다녀왔습니다. 봄이 오는 것 같아 기분이 좋네요.")
-            .build();
-
-    // 어제 일기
-    Diary yesterday =
-        Diary.builder()
-            .userId(user.getId())
-            .date(LocalDate.now().minusDays(1))
-            .weathers(List.of(Weather.CLOUDY))
-            .content("어제는 흐리고 추웠지만, 집에서 책을 읽으며 보내서 나쁘지 않았습니다.")
-            .build();
-
-    // 지난주 일기
-    Diary lastWeek =
-        Diary.builder()
-            .userId(user.getId())
-            .date(LocalDate.now().minusWeeks(1))
-            .weathers(List.of(Weather.RAINY))
-            .content("비가 왔지만 우산을 들고 카페에 가서 커피를 마셨습니다. 빗소리를 들으며 커피를 마시니 운치가 있었네요.")
-            .build();
-
-    diaryRepository.saveAll(List.of(today, yesterday, lastWeek));
+      diaryRepository.save(diary);
+      log.info("Test diary created for date: {}", date);
+    } catch (Exception e) {
+      log.error("Failed to create test diary for date: {}", date, e);
+    }
   }
 }
