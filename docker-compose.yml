@@ -5,10 +5,10 @@ services:
     image: mysql:8.0
     container_name: spring-template-mysql
     environment:
-      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_ROOT_PASSWORD: rlaeowjd1!
       MYSQL_DATABASE: spring_template
-      MYSQL_USER: user
-      MYSQL_PASSWORD: password
+      MYSQL_USER: admin
+      MYSQL_PASSWORD: rlaeowjd1!
     ports:
       - "3306:3306"
     volumes:
@@ -22,4 +22,4 @@ services:
       - "6379:6379"
 
 volumes:
-  mysql_data: 
+  mysql_data:

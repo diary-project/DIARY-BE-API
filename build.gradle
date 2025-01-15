@@ -43,6 +43,9 @@ dependencies {
     // H2 Database
     runtimeOnly 'com.h2database:h2'
 
+    // MySQL Database
+    runtimeOnly 'com.mysql:mysql-connector-j'
+
     // Lombok
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
@@ -64,19 +67,19 @@ spotless {
     java {
         // 구글 자바 스타일 가이드 적용
         googleJavaFormat()
-        
+
         // 라이센스 헤더
         licenseHeader '/* (C)$YEAR */'
-        
+
         // 빌드 폴더 제외
         targetExclude 'build/**'
-        
+
         // 들여쓰기 설정
         indentWithSpaces(4)
-        
+
         // 줄 끝 공백 제거
         trimTrailingWhitespace()
-        
+
         // 파일 끝에 새 줄 추가
         endWithNewline()
     }

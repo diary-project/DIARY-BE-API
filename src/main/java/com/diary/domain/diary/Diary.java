@@ -4,19 +4,7 @@ package com.diary.domain.diary;
 import com.diary.domain.common.BaseEntity;
 import com.diary.domain.hashtag.HashTag;
 import com.diary.domain.weather.Weather;
-import jakarta.persistence.CollectionTable;
-import jakarta.persistence.Column;
-import jakarta.persistence.ElementCollection;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinTable;
-import jakarta.persistence.ManyToMany;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -50,12 +38,8 @@ public class Diary extends BaseEntity {
   @Column(name = "weather")
   private List<Weather> weathers = new ArrayList<>();
 
-  @ManyToMany
-  @JoinTable(
-      name = "diary_hashtags",
-      joinColumns = @JoinColumn(name = "diary_id"),
-      inverseJoinColumns = @JoinColumn(name = "hashtag_id"))
-  private List<HashTag> hashtags = new ArrayList<>();
+  @OneToMany(mappedBy = "diary", cascade = CascadeType.ALL, orphanRemoval = true)
+  private List<DiaryHashTag> diaryHashTags = new ArrayList<>();
 
   @Builder
   public Diary(
@@ -71,7 +55,16 @@ public class Diary extends BaseEntity {
       this.weathers = weathers;
     }
     if (hashtags != null) {
-      this.hashtags = hashtags;
+      hashtags.forEach(this::addHashTag);
     }
+  }
+
+  public void addHashTag(HashTag hashTag) {
+    DiaryHashTag diaryHashTag = DiaryHashTag.builder().diary(this).hashTag(hashTag).build();
+    this.diaryHashTags.add(diaryHashTag);
+  }
+
+  public void removeHashTag(HashTag hashTag) {
+    this.diaryHashTags.removeIf(diaryHashTag -> diaryHashTag.getHashTag().equals(hashTag));
   }
 }
