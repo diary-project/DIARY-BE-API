@@ -4,12 +4,15 @@ package com.diary.domain.auth.controller;
 import com.diary.common.response.ApiResponse;
 import com.diary.domain.auth.dto.SignInRequest;
 import com.diary.domain.auth.dto.SignUpRequest;
+import com.diary.domain.auth.dto.TokenRefreshRequest;
 import com.diary.domain.auth.dto.TokenResponse;
 import com.diary.domain.auth.service.AuthService;
+import com.diary.domain.user.entity.User;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -34,5 +37,18 @@ public class AuthController {
   @PostMapping("/signin")
   public ApiResponse<TokenResponse> signIn(@Valid @RequestBody SignInRequest request) {
     return ApiResponse.success(authService.signIn(request));
+  }
+
+  @Operation(summary = "토큰 갱신", description = "Refresh Token을 사용하여 새로운 Access Token을 발급받습니다.")
+  @PostMapping("/refresh")
+  public ApiResponse<TokenResponse> refreshToken(@Valid @RequestBody TokenRefreshRequest request) {
+    return ApiResponse.success(authService.refreshToken(request));
+  }
+
+  @Operation(summary = "로그아웃", description = "사용자의 Refresh Token을 제거하여 로그아웃 처리합니다.")
+  @PostMapping("/logout")
+  public ApiResponse<Void> logout(@AuthenticationPrincipal User user) {
+    authService.logout(user.getId());
+    return ApiResponse.success(null);
   }
 }
