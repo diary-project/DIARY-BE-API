@@ -19,14 +19,13 @@ import org.springframework.security.core.userdetails.UserDetails;
 public class User implements UserDetails {
 
   @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long id;
+  @Column(length = 50)
+  private String id; // t_123(테스트), k_123(카카오), a_123(애플)
 
   @Column(nullable = false, unique = true)
   private String email;
 
-  @Column(nullable = false)
-  private String password;
+  @Column private String password;
 
   @Column(nullable = false)
   private String name;
@@ -35,12 +34,29 @@ public class User implements UserDetails {
   @Column(nullable = false)
   private Role role;
 
+  @Enumerated(EnumType.STRING)
+  @Column(nullable = false)
+  private AuthProvider authProvider;
+
   @Builder
-  public User(String email, String password, String name, Role role) {
+  public User(
+      String id, String email, String password, String name, Role role, AuthProvider authProvider) {
+    this.id = id;
     this.email = email;
     this.password = password;
     this.name = name;
     this.role = role;
+    this.authProvider = authProvider;
+  }
+
+  public static String generateId(AuthProvider provider, String providerId) {
+    String prefix =
+        switch (provider) {
+          case TEST -> "t_";
+          case KAKAO -> "k_";
+          case APPLE -> "a_";
+        };
+    return prefix + providerId;
   }
 
   @Override
@@ -51,6 +67,11 @@ public class User implements UserDetails {
   @Override
   public String getUsername() {
     return email;
+  }
+
+  @Override
+  public String getPassword() {
+    return password;
   }
 
   @Override

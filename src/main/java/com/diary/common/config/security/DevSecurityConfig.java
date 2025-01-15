@@ -27,25 +27,27 @@ public class DevSecurityConfig extends BaseSecurityConfig {
           authorize) {
     log.info("Configuring authorization for DEV profile");
     authorize
-        // Swagger UI v2
+        // Swagger UI v3 (먼저 체크)
+        .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html")
+        .permitAll()
+        // Swagger UI v2 (하위 호환성)
         .requestMatchers(
             "/v2/api-docs",
             "/swagger-resources",
             "/swagger-resources/**",
             "/configuration/ui",
             "/configuration/security",
-            "/swagger-ui.html",
             "/webjars/**")
-        .permitAll()
-        // Swagger UI v3
-        .requestMatchers("/v3/api-docs/**", "/swagger-ui/**")
         .permitAll()
         // Actuator endpoints
         .requestMatchers("/actuator/**")
         .permitAll()
-        // 나머지 요청은 인증 필요
+        // API 요청에 대해서만 인증 필요
+        .requestMatchers("/api/v1/**")
+        .authenticated()
+        // 나머지는 모두 허용
         .anyRequest()
-        .authenticated();
+        .permitAll();
   }
 
   @Bean

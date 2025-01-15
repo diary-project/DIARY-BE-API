@@ -1,6 +1,7 @@
 /* (C)2025 */
 package com.diary.common.security;
 
+import com.diary.domain.user.entity.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
@@ -16,8 +17,6 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 /** JWT 토큰 생성 및 검증을 담당하는 컴포넌트 */
@@ -45,11 +44,13 @@ public class JwtTokenProvider {
             .map(GrantedAuthority::getAuthority)
             .collect(Collectors.joining(","));
 
+    User user = (User) authentication.getPrincipal();
     Date now = new Date();
     Date validity = new Date(now.getTime() + jwtConfig.getExpiration());
 
     return Jwts.builder()
-        .setSubject(authentication.getName())
+        .setSubject(user.getId())
+        .claim("email", user.getEmail())
         .claim("auth", authorities)
         .setIssuedAt(now)
         .setExpiration(validity)
@@ -64,11 +65,12 @@ public class JwtTokenProvider {
    * @return JWT 리프레시 토큰
    */
   public String createRefreshToken(Authentication authentication) {
+    User user = (User) authentication.getPrincipal();
     Date now = new Date();
     Date validity = new Date(now.getTime() + jwtConfig.getRefreshTokenExpiration());
 
     return Jwts.builder()
-        .setSubject(authentication.getName())
+        .setSubject(user.getId())
         .setIssuedAt(now)
         .setExpiration(validity)
         .signWith(getSigningKey(), SignatureAlgorithm.HS512)
@@ -90,7 +92,8 @@ public class JwtTokenProvider {
             .map(SimpleGrantedAuthority::new)
             .collect(Collectors.toList());
 
-    UserDetails principal = new User(claims.getSubject(), "", authorities);
+    User principal =
+        User.builder().id(claims.getSubject()).email(claims.get("email", String.class)).build();
 
     return new UsernamePasswordAuthenticationToken(principal, token, authorities);
   }

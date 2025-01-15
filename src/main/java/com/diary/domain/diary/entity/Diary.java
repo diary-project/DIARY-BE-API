@@ -3,6 +3,7 @@ package com.diary.domain.diary.entity;
 
 import com.diary.domain.common.BaseEntity;
 import com.diary.domain.hashtag.HashTag;
+import com.diary.domain.user.entity.User;
 import com.diary.domain.weather.Weather;
 import jakarta.persistence.*;
 import java.time.LocalDate;
@@ -41,16 +42,22 @@ public class Diary extends BaseEntity {
   @OneToMany(mappedBy = "diary", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<DiaryHashTag> diaryHashTags = new ArrayList<>();
 
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "user_id", nullable = false)
+  private User user;
+
   @Builder
   public Diary(
       LocalDate date,
       String comment,
       String image,
       List<Weather> weathers,
-      List<HashTag> hashtags) {
+      List<HashTag> hashtags,
+      User user) {
     this.date = date;
     this.comment = comment;
     this.image = image;
+    this.user = user;
     if (weathers != null) {
       this.weathers = weathers;
     }
