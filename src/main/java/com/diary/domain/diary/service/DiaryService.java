@@ -74,6 +74,7 @@ public class DiaryService {
     String userId = SecurityUtil.getCurrentUserId();
     Diary diary = getDiaryByDate(date);
     diary.softDelete();
+    diaryRepository.save(diary);
   }
 
   @Transactional(readOnly = true)
