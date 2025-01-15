@@ -1,10 +1,11 @@
 /* (C)2025 */
-package com.diary.domain.common;
+package com.diary.common.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.MappedSuperclass;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import lombok.Getter;
 import org.springframework.data.annotation.CreatedDate;
@@ -31,4 +32,19 @@ public abstract class BaseEntity {
   @LastModifiedDate
   @Column(nullable = false)
   private LocalTime updateTime;
+
+  @Column(nullable = false)
+  private boolean isDeleted = false;
+
+  @Column private LocalDateTime deletedAt;
+
+  public void softDelete() {
+    this.isDeleted = true;
+    this.deletedAt = LocalDateTime.now();
+  }
+
+  public void restore() {
+    this.isDeleted = false;
+    this.deletedAt = null;
+  }
 }

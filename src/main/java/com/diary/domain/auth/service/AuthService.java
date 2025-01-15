@@ -58,6 +58,16 @@ public class AuthService {
 
   @Transactional
   public TokenResponse signIn(SignInRequest request) {
+    // 0. 사용자 상태 확인
+    User user =
+        userRepository
+            .findByEmail(request.getEmail())
+            .orElseThrow(() -> new BusinessException(ErrorCode.INVALID_CREDENTIALS));
+
+    if (!user.canLogin()) {
+      throw new BusinessException(ErrorCode.USER_WITHDRAWN);
+    }
+
     // 1. 인증 토큰 생성
     UsernamePasswordAuthenticationToken authenticationToken =
         new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword());

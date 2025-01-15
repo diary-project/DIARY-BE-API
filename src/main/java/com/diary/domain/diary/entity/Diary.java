@@ -1,9 +1,7 @@
 /* (C)2025 */
 package com.diary.domain.diary.entity;
 
-import com.diary.domain.common.BaseEntity;
-import com.diary.domain.hashtag.HashTag;
-import com.diary.domain.user.entity.User;
+import com.diary.common.entity.BaseEntity;
 import com.diary.domain.weather.Weather;
 import jakarta.persistence.*;
 import java.time.LocalDate;
@@ -16,8 +14,14 @@ import lombok.NoArgsConstructor;
 
 @Entity
 @Getter
-@Table(name = "diaries")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Table(
+    name = "diaries",
+    uniqueConstraints = {
+      @UniqueConstraint(
+          name = "uk_diary_user_date",
+          columnNames = {"userId", "date"})
+    })
 public class Diary extends BaseEntity {
 
   @Id
@@ -25,13 +29,10 @@ public class Diary extends BaseEntity {
   private Long id;
 
   @Column(nullable = false)
+  private String userId;
+
+  @Column(nullable = false)
   private LocalDate date;
-
-  @Column(columnDefinition = "TEXT")
-  private String comment;
-
-  @Column(length = 255)
-  private String image;
 
   @ElementCollection
   @Enumerated(EnumType.STRING)
@@ -39,39 +40,23 @@ public class Diary extends BaseEntity {
   @Column(name = "weather")
   private List<Weather> weathers = new ArrayList<>();
 
-  @OneToMany(mappedBy = "diary", cascade = CascadeType.ALL, orphanRemoval = true)
-  private List<DiaryHashTag> diaryHashTags = new ArrayList<>();
-
-  @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "user_id", nullable = false)
-  private User user;
+  @Column(nullable = false, columnDefinition = "TEXT")
+  private String content;
 
   @Builder
-  public Diary(
-      LocalDate date,
-      String comment,
-      String image,
-      List<Weather> weathers,
-      List<HashTag> hashtags,
-      User user) {
+  public Diary(String userId, LocalDate date, List<Weather> weathers, String content) {
+    this.userId = userId;
     this.date = date;
-    this.comment = comment;
-    this.image = image;
-    this.user = user;
+    this.content = content;
     if (weathers != null) {
       this.weathers = weathers;
     }
-    if (hashtags != null) {
-      hashtags.forEach(this::addHashTag);
+  }
+
+  public void updateWeatherAndContent(List<Weather> weathers, String content) {
+    if (weathers != null) {
+      this.weathers = weathers;
     }
-  }
-
-  public void addHashTag(HashTag hashTag) {
-    DiaryHashTag diaryHashTag = DiaryHashTag.builder().diary(this).hashTag(hashTag).build();
-    this.diaryHashTags.add(diaryHashTag);
-  }
-
-  public void removeHashTag(HashTag hashTag) {
-    this.diaryHashTags.removeIf(diaryHashTag -> diaryHashTag.getHashTag().equals(hashTag));
+    this.content = content;
   }
 }

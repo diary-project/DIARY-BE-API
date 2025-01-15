@@ -1,7 +1,7 @@
 /* (C)2025 */
 package com.diary.domain.hashtag;
 
-import com.diary.domain.common.BaseEntity;
+import com.diary.common.entity.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;

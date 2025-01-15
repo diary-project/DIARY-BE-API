@@ -174,8 +174,16 @@ class AuthServiceTest {
       request.setPassword("password123");
 
       Authentication authentication = mock(Authentication.class);
-      User user = User.builder().id("t_test123").email("test@example.com").role(Role.USER).build();
+      User user =
+          User.builder()
+              .id("t_test123")
+              .email("test@example.com")
+              .name("Test User")
+              .role(Role.USER)
+              .authProvider(AuthProvider.TEST)
+              .build();
       when(authentication.getPrincipal()).thenReturn(user);
+      when(userRepository.findByEmail(request.getEmail())).thenReturn(Optional.of(user));
 
       AuthenticationManager authenticationManager = mock(AuthenticationManager.class);
       when(authenticationManagerBuilder.getObject()).thenReturn(authenticationManager);

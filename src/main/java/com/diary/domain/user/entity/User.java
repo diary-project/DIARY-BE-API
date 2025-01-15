@@ -1,7 +1,14 @@
 /* (C)2025 */
 package com.diary.domain.user.entity;
 
-import jakarta.persistence.*;
+import com.diary.common.entity.BaseEntity;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Collections;
 import lombok.AccessLevel;
@@ -13,19 +20,19 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 @Entity
-@Table(name = "users")
 @Getter
+@Table(name = "users")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class User implements UserDetails {
+public class User extends BaseEntity implements UserDetails {
 
   @Id
   @Column(length = 50)
-  private String id; // t_123(테스트), k_123(카카오), a_123(애플)
+  private String id;
 
-  @Column(nullable = false, unique = true)
+  @Column(unique = true, nullable = false)
   private String email;
 
-  @Column private String password;
+  private String password;
 
   @Column(nullable = false)
   private String name;
@@ -37,6 +44,13 @@ public class User implements UserDetails {
   @Enumerated(EnumType.STRING)
   @Column(nullable = false)
   private AuthProvider authProvider;
+
+  @Enumerated(EnumType.STRING)
+  @Column(nullable = false)
+  private UserStatus status = UserStatus.ACTIVE;
+
+  @Column(name = "withdrawal_scheduled_at")
+  private LocalDateTime withdrawalScheduledAt;
 
   @Builder
   public User(
@@ -50,28 +64,40 @@ public class User implements UserDetails {
   }
 
   public static String generateId(AuthProvider provider, String providerId) {
-    String prefix =
-        switch (provider) {
-          case TEST -> "t_";
-          case KAKAO -> "k_";
-          case APPLE -> "a_";
-        };
-    return prefix + providerId;
+    return switch (provider) {
+      case TEST -> "t_" + providerId;
+      case KAKAO -> "k_" + providerId;
+      case APPLE -> "a_" + providerId;
+    };
+  }
+
+  public void initiateWithdrawal() {
+    this.status = UserStatus.WITHDRAWAL_REQUESTED;
+    this.withdrawalScheduledAt = LocalDateTime.now().plusDays(30);
+  }
+
+  public void cancelWithdrawal() {
+    this.status = UserStatus.ACTIVE;
+    this.withdrawalScheduledAt = null;
+  }
+
+  public void completeWithdrawal() {
+    this.status = UserStatus.WITHDRAWN;
+    this.softDelete();
+  }
+
+  public boolean canLogin() {
+    return this.status != UserStatus.WITHDRAWN;
   }
 
   @Override
   public Collection<? extends GrantedAuthority> getAuthorities() {
-    return Collections.singletonList(new SimpleGrantedAuthority(role.getKey()));
+    return Collections.singleton(new SimpleGrantedAuthority("ROLE_" + this.role.name()));
   }
 
   @Override
   public String getUsername() {
-    return email;
-  }
-
-  @Override
-  public String getPassword() {
-    return password;
+    return this.email;
   }
 
   @Override
@@ -91,6 +117,6 @@ public class User implements UserDetails {
 
   @Override
   public boolean isEnabled() {
-    return true;
+    return !isDeleted() && this.status != UserStatus.WITHDRAWN;
   }
 }
