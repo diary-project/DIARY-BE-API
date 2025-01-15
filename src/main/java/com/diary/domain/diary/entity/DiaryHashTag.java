@@ -1,5 +1,5 @@
 /* (C)2025 */
-package com.diary.domain.diary;
+package com.diary.domain.diary.entity;
 
 import com.diary.domain.common.BaseEntity;
 import com.diary.domain.hashtag.HashTag;

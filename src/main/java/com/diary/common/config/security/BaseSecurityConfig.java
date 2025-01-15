@@ -41,7 +41,7 @@ public abstract class BaseSecurityConfig {
         authorize -> {
           // 공통으로 허용할 경로 설정
           authorize
-              .requestMatchers("/api/auth/**")
+              .requestMatchers("/api/v1/auth/**")
               .permitAll()
               .requestMatchers("/api/health")
               .permitAll();
