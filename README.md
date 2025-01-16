@@ -1,6 +1,6 @@
-# Spring Boot Template
+# Diary API
 
-Spring Boot 기반의 REST API 프로젝트 템플릿입니다.
+일기 작성 및 관리를 위한 REST API 서비스입니다.
 
 ## 기능
 
@@ -8,41 +8,46 @@ Spring Boot 기반의 REST API 프로젝트 템플릿입니다.
 - Swagger UI 3.0 API 문서화
 - 글로벌 예외 처리 및 커스텀 예외
 - 환경별(local, dev, prod) 설정 분리
-- H2 인메모리 데이터베이스 (개발용)
-- Git hooks를 통한 코드 품질 관리
+- MySQL RDS 데이터베이스 연동
+- AWS 인프라 (EC2, RDS) Terraform 관리
+- 자동화된 배포 스크립트
 
 ## 시작하기
 
-### 방법 1: GitHub Template 사용
+### 로컬 개발 환경 설정
 
-1. GitHub에서 "Use this template" 버튼 클릭
-2. 새 repository 이름 입력 후 생성
-3. 생성된 프로젝트를 로컬로 clone
-4. 초기화 스크립트 실행:
+1. 프로젝트 클론:
    ```bash
-   ./scripts/init-project.sh <새로운패키지명> <새로운프로젝트명>
-   # 예: ./scripts/init-project.sh com.example myproject
+   git clone [repository-url]
+   cd diary-api
    ```
 
-### 방법 2: 직접 다운로드
-
-1. 이 프로젝트를 ZIP으로 다운로드
-2. 원하는 위치에 압축 해제
-3. 초기화 스크립트 실행:
+2. 환경 변수 설정:
    ```bash
-   ./scripts/init-project.sh <새로운패키지명> <새로운프로젝트명>
+   cp .env.example .env
+   # .env 파일을 적절히 수정
    ```
 
-### Git Hooks 설정
+3. 애플리케이션 실행:
+   ```bash
+   ./scripts/local.sh  # 로컬 환경
+   ./scripts/dev.sh    # 개발 환경
+   ./scripts/prod.sh   # 운영 환경
+   ```
 
-Git hooks 설정:
-```bash
-./scripts/setup-git-hooks.sh
-```
+### 배포
 
-이 설정으로 커밋 전에 자동으로 다음 검사가 실행됩니다:
-- 코드 스타일 검사 (Spotless)
-- 단위 테스트 실행
+1. AWS 인프라 생성:
+   ```bash
+   cd diary-api-infra/terraform
+   terraform init
+   terraform apply
+   ```
+
+2. 애플리케이션 배포:
+   ```bash
+   ./deploy.sh
+   ```
 
 ## 프로젝트 구조
 
@@ -50,7 +55,7 @@ Git hooks 설정:
 src/
 ├── main/
 │   ├── java/
-│   │   └── org/daejoeng/
+│   │   └── com/diary/
 │   │       ├── common/
 │   │       │   ├── config/
 │   │       │   ├── exception/
@@ -58,7 +63,8 @@ src/
 │   │       │   └── security/
 │   │       └── domain/
 │   │           ├── auth/
-│   │           └── user/
+│   │           ├── user/
+│   │           └── diary/
 │   └── resources/
 │       ├── application.yml
 │       ├── application-local.yml
@@ -66,28 +72,24 @@ src/
 │       └── application-prod.yml
 ```
 
+## API 문서
+
+- Swagger UI: `http://{server-ip}:8080/swagger-ui.html`
+- API Docs: `http://{server-ip}:8080/v3/api-docs`
+
 ## 환경 설정
 
 ### 프로파일
 
 - `local`: 로컬 개발 환경 (H2 DB, Swagger UI 허용)
-- `dev`: 개발 서버 환경
-- `prod`: 운영 서버 환경
+- `dev`: 개발 서버 환경 (MySQL RDS, Swagger UI 허용)
+- `prod`: 운영 서버 환경 (MySQL RDS, Swagger UI 비활성화)
 
-프로파일 설정:
-```bash
-./gradlew bootRun --args='--spring.profiles.active=local'
-```
+### 필수 환경 변수
 
-### Security 설정
-
-- JWT 시크릿 키는 환경변수 또는 설정 파일에서 설정
-- 각 환경별로 다른 보안 설정 적용 가능
-
-## API 문서
-
-- Swagger UI: `http://localhost:8080/swagger-ui.html`
-- API Docs: `http://localhost:8080/v3/api-docs`
+- `JWT_SECRET`: JWT 토큰 암호화 키
+- `DB_PASSWORD`: 데이터베이스 비밀번호
+- `EC2_IP`: EC2 인스턴스 IP 주소
 
 ## 라이선스
 

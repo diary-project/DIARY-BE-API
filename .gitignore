@@ -42,11 +42,28 @@ out/
 ### Logs ###
 logs/
 *.log
+app.log
+app.pid
 
 ### Environment Variables ###
 .env
 .env.*
 !.env.example
-# Application properties
+
+### Terraform ###
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfvars
+*.tfvars.json
+.terraformrc
+terraform.rc
+
+### SSH Keys ###
+*.pem
+*.key
+
+### Application Configuration ###
 src/main/resources/application.yml
 src/main/resources/application-*.yml
+!src/main/resources/application-example.yml
