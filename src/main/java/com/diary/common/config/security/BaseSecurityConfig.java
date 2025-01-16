@@ -44,6 +44,8 @@ public abstract class BaseSecurityConfig {
               .requestMatchers("/api/v1/auth/**")
               .permitAll()
               .requestMatchers("/api/health")
+              .permitAll()
+              .requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**")
               .permitAll();
 
           // 프로파일별 설정 추가

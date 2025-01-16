@@ -29,24 +29,24 @@ public class DiaryController {
   }
 
   @Operation(summary = "일기 조회", description = "특정 날짜의 일기를 조회합니다.")
-  @GetMapping("/{date}")
+  @GetMapping
   public ResponseEntity<DiaryResponse> getDiary(
-      @PathVariable @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate date) {
+      @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate date) {
     return ResponseEntity.ok(DiaryResponse.from(diaryService.getDiaryByDate(date)));
   }
 
   @Operation(summary = "일기 수정", description = "특정 날짜의 일기를 수정합니다.")
-  @PutMapping("/{date}")
+  @PutMapping
   public ResponseEntity<DiaryResponse> updateDiary(
-      @PathVariable @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate date,
+      @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate date,
       @RequestBody DiaryUpdateRequest request) {
     return ResponseEntity.ok(DiaryResponse.from(diaryService.updateDiary(date, request)));
   }
 
   @Operation(summary = "일기 삭제", description = "특정 날짜의 일기를 삭제합니다.")
-  @DeleteMapping("/{date}")
+  @DeleteMapping
   public ResponseEntity<Void> deleteDiary(
-      @PathVariable @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate date) {
+      @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate date) {
     diaryService.deleteDiary(date);
     return ResponseEntity.ok().build();
   }
